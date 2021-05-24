@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte Front; TP 001</title>
+</head>
+<body>
+
+   <!--  Componente 1: input que reemplaza texto por |  -->
+    <input-pipes></input-pipes>
+    <br>
+    <longitud-maxima></longitud-maxima>
+    <br>
+    <traductor-numeros></traductor-numeros>
+    
+    
+    <script>
+
+        //template para el primer componente
+        const inputTpl = document.createElement('template');
+
+        //template para el segundo componente
+        const inputTpl2 = document.createElement('template');
+
+         //template para el tercer componente
+         const inputTpl3 = document.createElement('template');
+
+        //Contenido del primer componente
+        inputTpl.innerHTML = `
+        
+        <div>
+            <p>Primer Componente: </p>
+            <input type="text" name="input" placeholder="Ingrese algún texto">
+            <div id="pipes"> </div>        
+            <div id="real-text"> </div>        
+        </div>
+        
+        `;
+
+       
+        
+        //Contenido del segundo componente
+        inputTpl2.innerHTML = `
+        
+        <div>
+            <p>Segundo Componente: </p>
+            <input type="text" name="input-longitud" placeholder="Ingrese algún texto again">
+                    
+        </div>
+        
+        `;
+     
+
+           
+        //Contenido del tercer componente
+        inputTpl3.innerHTML = `
+        
+        <div>
+            <p>Tercer Componente: </p>
+            <input type="text" name="input-traductor" placeholder="Ingrese algún numero">
+            <ul id="num-traducido" > </ul>
+        </div>
+        
+        `;
+        
+
+
+
+
+
+        class InputPipes extends HTMLElement{
+            constructor(){
+                super();
+
+                this._shadowRoot= this.attachShadow({'mode': 'open'});                                
+                this._shadowRoot.appendChild(inputTpl.content.cloneNode(true));
+
+                this.input = this._shadowRoot.querySelector('input');
+                this.pipes = this._shadowRoot.querySelector('#pipes');
+                this.realTxt = this._shadowRoot.querySelector('#real-text');
+
+
+                this.input.addEventListener('input', (e)=>{
+                    //En esta funcion lo que hago es ir tomando cada valor del input, y agregandolo
+                    //al div de real-text.
+                    this.realTxt.innerHTML = this.input.value;
+                   
+                })
+
+                this.input.addEventListener('keypress', (e)=>{
+    
+                   //En esta funcion, con el metodo "replace", lo que hago es, a cada valor del input que corresponde
+                   // con el codigo ascii de una letra, lo reemplazo
+                   //por un pipe. 
+                   //A su vez, voy concatenando cada pipe con el anterior, gracias al "+="
+                   
+                     if((e.keyCode >= 65) && (e.keyCode <= 122)){
+                       this.pipes.innerHTML += this.input.value.replace(`${this.input.value}`, "|");
+                    } 
+                   
+                    
+                })
+
+                //agrego el evento "keydown" porque en los demas eventos no se detecta que tecla es presionada
+                this.input.addEventListener("keydown", (e)=>{
+                    //Acá vemos si el codigo de la tecla que se presionó es 8, que es el de la decla de DELETE
+                    //Si entra al condicional, nos reinicia el input y los pipes, agregando asi
+                    //la funcion de borrar todo junto
+                    if(e.keyCode == 8){
+                        this.input.value = " ";
+                        this.pipes.innerHTML = ""
+                    }
+                })
+
+            }
+        }
+
+        class InputLongitud extends HTMLElement{
+            constructor(){
+                super();
+
+                this._shadowRoot= this.attachShadow({'mode': 'open'});
+                this._shadowRoot.appendChild(inputTpl2.content.cloneNode(true));
+
+                this.input = this._shadowRoot.querySelector('input');
+                
+                //creo esta variable a modo de contador, ademas de ayudar a la reusabilidad del codigo pudiendo modificar facilmente
+                //la longitud maxima del campo
+                let max_length = 10;
+                this.input.maxLength = max_length;
+
+
+                this.input.addEventListener('input', ()=>{
+                    //a medida de que el input va cambiando, nosotros vamos agarrando su longitud nueva
+                    let length = this.input.value.length;
+                    if(length >= max_length){
+                        //acá alertamos amistosamente al usuario de que no puede escribir más
+                        alert('Llegaste al maximo de caracteres papá');
+                    }
+                })
+                
+                
+            }
+        }
+
+        class InputTraductor extends HTMLElement{
+            constructor(){
+                super();
+
+                this._shadowRoot= this.attachShadow({'mode': 'open'});
+                this._shadowRoot.appendChild(inputTpl3.content.cloneNode(true));
+
+                this.input = this._shadowRoot.querySelector('input')
+                this.numTraducido = this._shadowRoot.querySelector("#num-traducido");
+                
+                
+                this.input.addEventListener('input', ()=>{
+                    //Convierto los valores que se van ingresando
+                    //al input en un array , separando caracter por caracter
+                    let num = this.input.value.split('');
+                    
+
+                    //reiniciamos el campo cada vez que cambia
+                    //el input para que no se concatene lo que teniamos antes dentro del for
+                    this.numTraducido.innerHTML = "";
+
+                    for (let i = 0; i < num.length; i++) {
+                        
+                      //Usando esta estructura vamos analizando cada caso, y cuando coincide el valor con el case
+                      // nos cambia por la palabra correspondiente  
+                      switch(num[i]){
+                          case "0":
+                          //Insertamos un li al padre , que es un ul, para facilitar el poner uno abajo del otro.
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Cero</li>`
+                              break;
+                          case "1": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Uno</li>`
+                          break;
+                          case "2": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Dos</li>`
+                          break;
+                          case "3": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Tres</li>`
+                          break;
+                          case "4": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Cuatro</li>`
+                          break;
+                          case "5": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Cinco</li>`
+                          break;
+                          case "6": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Seis</li>`
+                          break;
+                          case "7": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Siete</li>`
+                          break;
+                          case "8": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Ocho</li>`
+                          break;
+                          case "9": 
+                          this.numTraducido.innerHTML += `<li style="list-style:none">Nueve</li>`
+                          break;
+                      }; 
+                    } 
+                  
+                    
+                    
+
+                   
+                
+                })
+            }
+        }
+
+        window.customElements.define('input-pipes', InputPipes);
+        window.customElements.define('longitud-maxima', InputLongitud);
+        window.customElements.define('traductor-numeros', InputTraductor);
+
+
+
+
+    </script>
+
+
+
+
+</body>
+</html>
